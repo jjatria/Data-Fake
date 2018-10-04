@@ -13,8 +13,11 @@ our @EXPORT = qw(
   fake_tld
   fake_domain
   fake_email
+  fake_ip4
+  fake_ip6
 );
 
+use Data::Fake::Core  ();
 use Data::Fake::Text  ();
 use Data::Fake::Names ();
 
@@ -69,6 +72,37 @@ sub fake_email {
     my $dn = fake_domain;
     return sub {
         return sprintf( "%s.%s@%s", map { lc } map { $_->() } $fn, $ln, $dn );
+    };
+}
+
+=func fake_ip4
+
+    $generator = fake_ip4();
+
+Returns a generator that constructs a random IPv4 address.
+
+=cut
+
+sub fake_ip4 {
+    my $fi = Data::Fake::Core::fake_int( 0, 255 );
+    return sub {
+        return Data::Fake::Core::fake_join( '.', ($fi) x 4 )->();
+    };
+}
+
+=func fake_ip6
+
+    $generator = fake_ip6();
+
+Returns a generator that constructs a random IPv6 address.
+
+=cut
+
+sub fake_ip6 {
+    my $fi = Data::Fake::Core::fake_int( 0, 65535 );
+    my $fo = sub { unpack( 'h4',  pack( 'n', $fi->() )) };
+    return sub {
+        return Data::Fake::Core::fake_join( ':', ($fo) x 8 )->();
     };
 }
 
